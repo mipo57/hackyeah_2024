@@ -27,7 +27,7 @@ problem_classes = get_args(PROBLEM_CLASS)
 class_descriptions = {
     "filler_words": "Filler words are words that are used to fill the gap between words or phrases, such as 'yyyy', 'aaaa', or 'hmmm' etc.. They are often used to buy time or to think of the next word.",
     "repetitions": "Repetitions are phrases that are repeated multiple times (overused) in speech. They can be distracting to the listener and can be a sign of hesitation or uncertainty.",
-    "parenthetical_remarks": "Parenthetical remarks are remarks that are made in the middle of a speech that break the flow of the speech and may cause confusion.",
+    "parenthetical_remarks": "Parenthetical remarks are remarks that are made in the middle of a speech that break the flow of the speech and may cause confusion. Be aggressive in detecting them.",
     "topic_change": "Topic change is when the speaker abroubtly changes the topic of he is talking about.",
     "excessive_numbers": "Excessive numbers is situation when speaker fluds the listiner with a lot of numbers. Don't count every number as a problem, only if eg. speaker says 4+ different numbers in short time. Don't count numbers like Act 1.2 as multiple numbers, just one.",
     "complex_language": "Complex language is using words that will difficult to understand for average person.",
@@ -117,7 +117,7 @@ class AudioProblem(BaseModel):
 class AudioProblems(BaseModel):
     thinking: str = Field(
         ...,
-        description="Thinking of the problems in the audio. Must be below 100 words.",
+        description="Thinking of the problems in the audio. Must be below 100 words. Think if the topical flow is not interrupted. If yes, then make sure to mark this as parenthetical_remarks.",
     )
     problems: List[AudioProblem] = Field(
         ..., description="List of problems with start and end word id and problem class"

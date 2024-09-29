@@ -15,7 +15,7 @@ class Transcription(BaseModel):
 
 
 def convert_transcript_to_text(transcription_words: List[TranscriptionWord]) -> str:
-    model = ChatOpenAI(model="gpt-4o")
+    model = ChatOpenAI(model="gpt-4o-mini")
 
     id_to_word = {i + 1: word for i, word in enumerate(transcription_words)}
 

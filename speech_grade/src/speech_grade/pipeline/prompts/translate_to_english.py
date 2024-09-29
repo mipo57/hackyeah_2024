@@ -13,7 +13,7 @@ class Translation(BaseModel):
 
 
 def translate_to_english(text: str) -> str:
-    model = ChatOpenAI(model="gpt-4o")
+    model = ChatOpenAI(model="gpt-4o-mini")
 
     parser = PydanticOutputParser(pydantic_object=Translation)
 
