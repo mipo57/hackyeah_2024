@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import GaugeChart from 'react-gauge-chart';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -44,6 +44,32 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [expandedError, setExpandedError] = useState(null);
   const videoRef = useRef(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const loadingIntervalRef = useRef(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoadingProgress(0);
+      loadingIntervalRef.current = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 99) {
+            clearInterval(loadingIntervalRef.current);
+            return 99;
+          }
+          return prev + (100 / (40 * 10)); // Update 10 times per second for 40 seconds
+        });
+      }, 100); // Run every 100ms
+    } else {
+      clearInterval(loadingIntervalRef.current);
+      setLoadingProgress(0);
+    }
+
+    return () => {
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+      }
+    };
+  }, [isLoading]);
 
   const tabs = [
     { id: 'score', label: 'Jakość' },
@@ -248,6 +274,15 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {Header()}
+
+      {isLoading && (
+        <div className="w-full bg-gray-200 dark:bg-gray-700 h-1">
+          <div 
+            className="bg-blue-600 dark:bg-blue-400 h-1 transition-all duration-100 ease-linear"
+            style={{ width: `${loadingProgress}%` }}
+          ></div>
+        </div>
+      )}
 
       <div className="max-w-[90em] xl:min-w-[90em] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
