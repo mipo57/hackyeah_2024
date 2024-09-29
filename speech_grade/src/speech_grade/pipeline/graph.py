@@ -122,11 +122,15 @@ class ClassifyImageState(TypedDict):
 
 
 def step_classify_image(state: ClassifyImageState) -> State:
-    events = classify_image(state["image_path"])
+    try:
+        events = classify_image(state["image_path"])
 
-    events = combine_overlapping_events(events)
+        events = combine_overlapping_events(events)
 
-    return {"events": events}
+        return {"events": events}
+    except Exception as e:
+        print(e)
+        return {"events": []}
 
 
 def step_gather_images(_state: State) -> State:
