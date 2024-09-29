@@ -20,6 +20,9 @@ SłowoMistrz to zaawansowane narzędzie do analizy i poprawy jakości wypowiedzi
 
 
 ## Struktura projektu
+
+![Pipeline](./speech_grade/output.jpeg)
+
 Projekt SłowoMistrz składa się z dwóch głównych komponentów:
 1. Backend (Python):
 - Znajduje się w katalogu speech_grade/
