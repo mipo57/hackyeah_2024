@@ -56,7 +56,7 @@ function AppContent() {
             clearInterval(loadingIntervalRef.current);
             return 99;
           }
-          return prev + (100 / (40 * 10)); // Update 10 times per second for 40 seconds
+          return prev + (100 / (60 * 10)); // Update 10 times per second for 40 seconds
         });
       }, 100); // Run every 100ms
     } else {
