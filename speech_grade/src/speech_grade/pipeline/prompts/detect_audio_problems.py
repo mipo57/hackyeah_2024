@@ -29,13 +29,13 @@ class_descriptions = {
     "repetitions": "Repetitions are phrases that are repeated multiple times (overused) in speech. They can be distracting to the listener and can be a sign of hesitation or uncertainty.",
     "parenthetical_remarks": "Parenthetical remarks are remarks that are made in the middle of a speech that break the flow of the speech and may cause confusion.",
     "topic_change": "Topic change is when the speaker abroubtly changes the topic of he is talking about.",
-    "excessive_numbers": "Excessive numbers is situation when speaker fluds the listiner with a lot of numbers. Don't count every number as a problem, only if eg. speaker says like 3 or 4 unrelated numbers in row. Don't count numbers like Act 1.2 as multiple numbers, just one.",
-    "complex_language": "Complex language is using words that will difficult to understand for average person, like some lawyer words.",
+    "excessive_numbers": "Excessive numbers is situation when speaker fluds the listiner with a lot of numbers. Don't count every number as a problem, only if eg. speaker says 4+ different numbers in short time. Don't count numbers like Act 1.2 as multiple numbers, just one.",
+    "complex_language": "Complex language is using words that will difficult to understand for average person.",
     "jargon": "Jargon is language that is specific to a particular field or industry. It can be difficult to understand for someone who is not familiar with the field or industry.",
     "foreign_language": "Speaker is saying words that are not in Polish..",
     "long_pause": "Long pause is a pause that is longer than usual.",
     "incorrect_words": "Incorrect words are words that are said incorrectly.",
-    "passive_voice": "Passive voice is when the speaker uses the passive voice to describe an action.",
+    "passive_voice": "Passive voice is when the speaker uses the passive voice.",
 }
 
 class_pl_names = {
@@ -146,7 +146,7 @@ def detect_audio_problems(transcription_words: List[TranscriptionWord]) -> List[
         [
             (
                 "system",
-                "You will be given a transcription of a video and you will need to detect problems in the audio. Here are possible classes with descriptions:\n{class_descriptions}\nStart with thinking what problems could be in the audio via citing parts. Then you will need to return list of problems with start and end word id and problem class.\n {output_format}",
+                "You will be given a transcription of a video in polish language and you will need to detect problems in the audio. Here are possible classes with descriptions:\n{class_descriptions}\nStart with thinking what problems could be in the audio via citing parts. Then you will need to return list of problems with start and end word id and problem class.\n {output_format}",
             ),
             ("user", "{transcription_formatted}"),
         ]
