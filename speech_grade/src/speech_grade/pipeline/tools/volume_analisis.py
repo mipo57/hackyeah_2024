@@ -3,7 +3,13 @@ from pydub import AudioSegment
 from openai.types.audio import TranscriptionWord
 from typing import List, Tuple
 
-def analyze_speech_volume(audio_path: str, words: List[TranscriptionWord], high_threshold_db=70, low_threshold_db=45) -> Tuple[List[TranscriptionWord], List[TranscriptionWord]]:
+
+def analyze_speech_volume(
+    audio_path: str,
+    words: List[TranscriptionWord],
+    high_threshold_db=70,
+    low_threshold_db=45,
+) -> Tuple[List[TranscriptionWord], List[TranscriptionWord]]:
     """
     Analyze speech volume in an audio file and identify words with too high or too low volume.
 
@@ -35,7 +41,7 @@ def analyze_speech_volume(audio_path: str, words: List[TranscriptionWord], high_
         if rms > 0:
             db = 20 * np.log10(rms)
         else:
-            db = -float('inf')
+            db = -float("inf")
 
         if db > high_threshold_db:
             high_volume_words.append(word)
@@ -46,6 +52,7 @@ def analyze_speech_volume(audio_path: str, words: List[TranscriptionWord], high_
         volumes_timestamps.append((word_start_ms / 1000, word_end_ms / 1000))
 
     return high_volume_words, low_volume_words, volumes, volumes_timestamps
+
 
 # Example usage:
 # high_volume_words, low_volume_words = analyze_speech_volume("path/to/your/audio/file.mp3", transcript_words)

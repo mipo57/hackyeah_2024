@@ -5,7 +5,6 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -77,17 +76,17 @@ class_pl_names = {
 #   ];
 
 class_colors = {
-    "filler_words": '#FFA500',  # Orange
-    "repetitions": '#4CAF50',   # Green
-    "parenthetical_remarks": '#CDDC39',  # Lime
-    "topic_change": '#2196F3',  # Blue
-    "excessive_numbers": '#9C27B0',  # Purple
-    "complex_language": '#F44336',  # Red
-    "jargon": '#FF9800',  # Dark Orange
-    "foreign_language": '#8BC34A',  # Light Green
-    "long_pause": '#03A9F4',  # Light Blue
-    "incorrect_words": '#E91E63',  # Pink
-    "passive_voice": '#FF5722',  # Deep Orange
+    "filler_words": "#FFA500",  # Orange
+    "repetitions": "#4CAF50",  # Green
+    "parenthetical_remarks": "#CDDC39",  # Lime
+    "topic_change": "#2196F3",  # Blue
+    "excessive_numbers": "#9C27B0",  # Purple
+    "complex_language": "#F44336",  # Red
+    "jargon": "#FF9800",  # Dark Orange
+    "foreign_language": "#8BC34A",  # Light Green
+    "long_pause": "#03A9F4",  # Light Blue
+    "incorrect_words": "#E91E63",  # Pink
+    "passive_voice": "#FF5722",  # Deep Orange
 }
 
 class_pl_problem_description = {
@@ -104,47 +103,66 @@ class_pl_problem_description = {
     "passive_voice": "Mowa bierna to mowa, w której mówca używa mowy biernej do opisu akcji. Może to być znakiem braku skupienia mówcy lub niepewności.",
 }
 
+
 class AudioProblem(BaseModel):
     """Joke to tell user."""
+
     start_word_id: int = Field(..., description="Id of the first word of the problem")
     end_word_id: int = Field(..., description="Id of the last word of the problem")
-    problem_class: PROBLEM_CLASS = Field(..., description="The problem class from the list of problems")
+    problem_class: PROBLEM_CLASS = Field(
+        ..., description="The problem class from the list of problems"
+    )
+
 
 class AudioProblems(BaseModel):
-    thinking: str = Field(..., description="Thinking of the problems in the audio. Must be below 100 words.")
-    problems: List[AudioProblem] = Field(..., description="List of problems with start and end word id and problem class")
+    thinking: str = Field(
+        ...,
+        description="Thinking of the problems in the audio. Must be below 100 words.",
+    )
+    problems: List[AudioProblem] = Field(
+        ..., description="List of problems with start and end word id and problem class"
+    )
+
 
 def detect_audio_problems(transcription_words: List[TranscriptionWord]) -> List[Event]:
     model = ChatOpenAI(model="gpt-4o")
 
-    id_to_word = {i+1: word for i, word in enumerate(transcription_words)}
+    id_to_word = {i + 1: word for i, word in enumerate(transcription_words)}
 
-    transcription_formatted = "\n".join([
-        f"Word id: {i}, word: {word.word}" for i, word in id_to_word.items()
-    ])
+    transcription_formatted = "\n".join(
+        [f"Word id: {i}, word: {word.word}" for i, word in id_to_word.items()]
+    )
 
-    class_descriptions_formatted = "\n".join([
-        f"- Class: {problem_class}, description: {class_descriptions[problem_class]}" for problem_class in problem_classes
-    ])
+    class_descriptions_formatted = "\n".join(
+        [
+            f"- Class: {problem_class}, description: {class_descriptions[problem_class]}"
+            for problem_class in problem_classes
+        ]
+    )
 
     parser = PydanticOutputParser(pydantic_object=AudioProblems)
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "You will be given a transcription of a video and you will need to detect problems in the audio. Here are possible classes with descriptions:\n{class_descriptions}\nStart with thinking what problems could be in the audio via citing parts. Then you will need to return list of problems with start and end word id and problem class.\n {output_format}"),
-        ("user", "{transcription_formatted}"),
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You will be given a transcription of a video and you will need to detect problems in the audio. Here are possible classes with descriptions:\n{class_descriptions}\nStart with thinking what problems could be in the audio via citing parts. Then you will need to return list of problems with start and end word id and problem class.\n {output_format}",
+            ),
+            ("user", "{transcription_formatted}"),
+        ]
+    )
 
     prompt.input_variables = ["transcription_formatted"]
-    prompt.partial_variables = {
-        "output_format": parser.get_format_instructions()
-    }
+    prompt.partial_variables = {"output_format": parser.get_format_instructions()}
 
     chain = prompt | model | parser
 
-    result: AudioProblems = chain.invoke({
-        "transcription_formatted": transcription_formatted,
-        "class_descriptions": class_descriptions_formatted
-    })
+    result: AudioProblems = chain.invoke(
+        {
+            "transcription_formatted": transcription_formatted,
+            "class_descriptions": class_descriptions_formatted,
+        }
+    )
 
     final_result = []
     for problem in result.problems:
@@ -152,12 +170,14 @@ def detect_audio_problems(transcription_words: List[TranscriptionWord]) -> List[
         end_word = id_to_word[problem.end_word_id]
         problem_class = problem.problem_class
 
-        final_result.append(Event(
-            start_s=start_word.start,
-            end_s=end_word.end,
-            event=class_pl_names[problem_class],
-            description=class_pl_problem_description[problem_class],
-            color=class_colors[problem_class],
-        ))
+        final_result.append(
+            Event(
+                start_s=start_word.start,
+                end_s=end_word.end,
+                event=class_pl_names[problem_class],
+                description=class_pl_problem_description[problem_class],
+                color=class_colors[problem_class],
+            )
+        )
 
     return final_result

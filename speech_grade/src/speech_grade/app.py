@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict
+from typing import Dict
 import time
 from speech_grade.pipeline.graph import build_graph
 from tempfile import TemporaryDirectory
@@ -21,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+
 @app.post("/analyze_video", response_model=Dict)
 async def analyze_video(video: UploadFile = File(...)):
     video_name = video.filename or "unnamed_video"
@@ -30,11 +31,9 @@ async def analyze_video(video: UploadFile = File(...)):
         with open(video_path, "wb") as buffer:
             buffer.write(video.file.read())
 
-        res = graph.invoke({
-            "temp_dir": temp_dir,
-            "video_path": video_path,
-            "events": []
-        })
+        res = graph.invoke(
+            {"temp_dir": temp_dir, "video_path": video_path, "events": []}
+        )
 
     return {
         "video_name": video_name,
@@ -54,9 +53,13 @@ async def analyze_video(video: UploadFile = File(...)):
         "volumes_timestamps": res["volumes_timestamps"],
         "readable_transcription": res["readable_transcription"],
         "english_translation": res["english_translation"],
-        "suggestions": res["suggestions"]
+        "suggestions": res["suggestions"],
     }
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("SPEECH_GRADE_PORT", "8000")))
+
+    uvicorn.run(
+        app, host="0.0.0.0", port=int(os.environ.get("SPEECH_GRADE_PORT", "8000"))
+    )

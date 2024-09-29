@@ -1,4 +1,3 @@
-import base64
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part, SafetySetting
 import google.generativeai as genai
@@ -11,13 +10,11 @@ credentials, _ = default()
 genai.configure(credentials=credentials)
 vertexai.init(project="serious-mariner-427010-u3", location="us-central1")
 
+
 def analyze_audio(audio_file_path: str):
     audio_data = open(audio_file_path, "rb").read()
 
-    audio1 = Part.from_data(
-            mime_type="audio/mpeg",
-            data=audio_data
-        )
+    audio1 = Part.from_data(mime_type="audio/mpeg", data=audio_data)
 
     generation_config = {
         "max_output_tokens": 8192,
@@ -28,19 +25,19 @@ def analyze_audio(audio_file_path: str):
     safety_settings = [
         SafetySetting(
             category=SafetySetting.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold=SafetySetting.HarmBlockThreshold.OFF
+            threshold=SafetySetting.HarmBlockThreshold.OFF,
         ),
         SafetySetting(
             category=SafetySetting.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold=SafetySetting.HarmBlockThreshold.OFF
+            threshold=SafetySetting.HarmBlockThreshold.OFF,
         ),
         SafetySetting(
             category=SafetySetting.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold=SafetySetting.HarmBlockThreshold.OFF
+            threshold=SafetySetting.HarmBlockThreshold.OFF,
         ),
         SafetySetting(
             category=SafetySetting.HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold=SafetySetting.HarmBlockThreshold.OFF
+            threshold=SafetySetting.HarmBlockThreshold.OFF,
         ),
     ]
 
