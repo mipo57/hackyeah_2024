@@ -33,6 +33,13 @@ function AppContent() {
   const { currentVideoId } = useCurrentVideoState();
 
   const current_inference = get_inference_by_id(currentVideoId, inferences);
+  const volumes = current_inference?.volumes || [];
+  const volumes_timestamps = current_inference?.volumes_timestamps || [];
+  // Add this new line to get the questions from the current inference
+  const questions = current_inference?.questions || [];
+  const readable_transcription = current_inference?.readable_transcription || [];
+  const english_translation = current_inference?.english_translation || [];
+  const suggestions = current_inference?.suggestions || [];
   
   const [isLoading, setIsLoading] = useState(false);
   const [expandedError, setExpandedError] = useState(null);
@@ -48,13 +55,31 @@ function AppContent() {
 
   // Mock data for the charts
   const loudnessData = {
-    labels: Array.from({ length: 20 }, (_, i) => i * 5),
+    labels: volumes_timestamps.map((timestamp, i) => Math.round(parseFloat(timestamp))),
     datasets: [
       {
         label: 'Głośność',
-        data: Array.from({ length: 20 }, () => Math.random() * 100),
+        data: volumes,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1
+      },
+      {
+        label: 'Linia 45dB',
+        data: Array(volumes.length).fill(45),
+        borderColor: 'rgba(75, 192, 192, 0.8)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        fill: false,
+        pointRadius: 0,
+      },
+      {
+        label: 'Linia 75 WPM',
+        data: Array(volumes.length).fill(75),
+        borderColor: 'rgba(255, 159, 64, 0.8)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        fill: false,
+        pointRadius: 0,
       }
     ]
   };
@@ -72,7 +97,7 @@ function AppContent() {
       },
       {
         label: 'Linia 100 WPM',
-        data: Array(20).fill(100),
+        data: Array(wpm_data.length).fill(100),
         borderColor: 'rgba(75, 192, 192, 0.8)',
         borderWidth: 2,
         borderDash: [5, 5],
@@ -81,7 +106,7 @@ function AppContent() {
       },
       {
         label: 'Linia 150 WPM',
-        data: Array(20).fill(150),
+        data: Array(wpm_data.length).fill(150),
         borderColor: 'rgba(255, 159, 64, 0.8)',
         borderWidth: 2,
         borderDash: [5, 5],
@@ -175,12 +200,58 @@ function AppContent() {
 
   const currentSentiment = sentiments[sentiment] || sentiments.neutral;
 
+  // New variables for content analysis
+  const transcriptionContent = (
+    <p className="mb-2">{readable_transcription}</p>
+  );
+
+  const englishTranslation = (
+    <p>{english_translation}</p>
+  );
+
+  const colors = [
+    'blue',
+    'green',
+    'yellow',
+    'red'
+  ]
+
+  const improvementSuggestions = suggestions.map((suggestion, index) => ({
+    id: index+1,
+    color: colors[index % colors.length],
+    text: suggestion
+  }))
+
+  // const improvementSuggestions = [
+  //   {
+  //     id: 1,
+  //     color: 'blue',
+  //     text: 'Improve clarity in the introduction by providing a concise overview of the main topics.'
+  //   },
+  //   {
+  //     id: 2,
+  //     color: 'green',
+  //     text: 'Add more specific examples to support your main points and enhance understanding.'
+  //   },
+  //   {
+  //     id: 3,
+  //     color: 'yellow',
+  //     text: 'Consider using simpler language in technical sections to improve accessibility for a broader audience.'
+  //   },
+  //   {
+  //     id: 4,
+  //     color: 'red',
+  //     text: 'Strengthen the conclusion with a clear call-to-action and summary of key takeaways.'
+  //   }
+  // ];
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {Header()}
 
       <div className="max-w-[90em] xl:min-w-[90em] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Existing video and sidebar content */}
           <main className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden relative min-h-[500px]">
             <VideoPlayerWithTimeline setIsLoading={setIsLoading} ref={videoRef} />
           </main>
@@ -233,13 +304,13 @@ function AppContent() {
                         <div className="mt-8 p-6 bg-white dark:bg-gray-700 rounded-lg pb-4">
                           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Indeks mglistości (Fog Index)</h3>
                           <div className="flex items-center justify-between">
-                            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">16</div>
+                            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{current_inference.fog_index}</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              <span className="font-medium">Interpretacja:</span> Trudny
+                              <span className="font-medium">Interpretacja:</span> {fog_interpretation(current_inference.fog_index)}
                             </div>
                           </div>
                           <div className="mt-4 h-2 bg-gray-200 dark:bg-gray-600 rounded-full">
-                            <div className="h-full bg-blue-500 rounded-full" style={{ width: '80%' }}></div>
+                            <div className={"h-full rounded-full " + fog_index_color(current_inference.fog_index)} style={{ width: fog_index_percentage(current_inference.fog_index) + "%" }}></div>
                           </div>
                         </div>
 
@@ -326,10 +397,6 @@ function AppContent() {
                             <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Szybkość mówienia (WPM)</h3>
                             <Line data={wpmData} options={chartOptions} />
                           </div>
-                          <div className="w-full">
-                            <h3 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-2">Wysokość głosu</h3>
-                            <Line data={wpmData} options={chartOptions} />
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -337,30 +404,23 @@ function AppContent() {
                   {activeTab === 'comments' && (
                     <div className="space-y-6">
                       <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Pytania</h2>
-                      <ul className="space-y-4 mb-6">
-                        <li className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                          <p className="font-medium text-gray-800 dark:text-white">User1</p>
-                          <p className="text-gray-600 dark:text-gray-300">wietne wideo! Dużo się nauczyłem.</p>
-                        </li>
-                        <li className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                          <p className="font-medium text-gray-800 dark:text-white">User2</p>
-                          <p className="text-gray-600 dark:text-gray-300">Czy mógłbyś wyjaśnić koncepcję z 2:30 bardziej szczegółowo?</p>
-                        </li>
-                      </ul>
-                      <div>
-                        <textarea
-                          className="w-full h-20 p-3 border border-gray-300 dark:border-gray-600 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-2"
-                          placeholder="Dodaj komentarz..."
-                        ></textarea>
-                        <button className="w-full bg-blue-500 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-600 transition duration-150 ease-in-out">
-                          Opublikuj Komentarz
-                        </button>
+                      <div className="h-[500px] overflow-y-auto">
+                        <ul className="space-y-4 mb-6">
+                          {questions.map((question, index) => (
+                            <li key={index} className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
+                              <p className="text-gray-600 dark:text-gray-300">{question}</p>
+                            </li>
+                          ))}
+                          {questions.length === 0 && (
+                            <li className="text-gray-500 dark:text-gray-400">Brak pytań dla tego wideo.</li>
+                          )}
+                        </ul>
                       </div>
                     </div>
                   )}
                   {activeTab === 'transcription' && (
                     <div className="space-y-6">
-                      <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Transkrypcja</h2>
+                      <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Zawartość</h2>
                       <div className="h-[500px] overflow-y-auto">
                         {(transcription || []).map((item, index) => (
                           <div
@@ -437,11 +497,92 @@ function AppContent() {
             )}
           </aside>
         </div>
+
+        {/* Improved wide paper section */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Analiza Treści</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                </svg>
+                Transkrypcja
+              </h3>
+              <div className="h-[400px] overflow-y-auto text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                {transcriptionContent}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 003.13-3.733 18.992 18.992 0 01-1.487-2.494 1 1 0 111.79-.89c.234.47.489.928.764 1.372.417-.934.752-1.913.997-2.927H3a1 1 0 110-2h3V3a1 1 0 011-1zm6 6a1 1 0 01.894.553l2.991 5.982a.869.869 0 01.02.037l.99 1.98a1 1 0 11-1.79.895L15.383 16h-4.764l-.724 1.447a1 1 0 11-1.788-.894l.99-1.98.019-.038 2.99-5.982A1 1 0 0113 8zm-1.382 6h2.764L13 11.236 11.618 14z" clipRule="evenodd" />
+                </svg>
+                Zawartość (en)
+              </h3>
+              <div className="h-[400px] overflow-y-auto text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                {englishTranslation}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                Sugestie poprawy
+              </h3>
+              <ul className="list-none h-[400px] overflow-y-auto text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg space-y-4">
+                {improvementSuggestions.map((suggestion) => (
+                  <li key={suggestion.id} className="flex items-start">
+                    <span className={`flex-shrink-0 w-6 h-6 rounded-full bg-${suggestion.color}-100 dark:bg-${suggestion.color}-800 flex items-center justify-center mr-3 mt-1`}>
+                      <span className={`text-${suggestion.color}-600 dark:text-${suggestion.color}-300 font-semibold text-sm`}>{suggestion.id}</span>
+                    </span>
+                    <p>{suggestion.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
       {Footer()}
     </div>
   );
+}
+
+function fog_interpretation(fog_index) {
+  if (fog_index <= 6) {
+    return "Bardzo prosty";
+  } else if (fog_index <= 9) {
+    return "Prosty";
+  } else if (fog_index <= 12) {
+    return "Dość prosty";
+  } else if (fog_index < 15) {
+    return "Dość trudny";
+  } else if (fog_index <= 17) {
+    return "Trudny";
+  } else {
+    return "Bardzo trudny";
+  }
+}
+
+function fog_index_color(fog_index) {
+  if (fog_index <= 6) {
+    return "bg-green-500";
+  } else if (fog_index <= 9) {
+    return "bg-yellow-500";
+  } else if (fog_index <= 12) {
+    return "bg-orange-500";
+  } else if (fog_index <= 15) {
+    return "bg-red-500";
+  } else {
+    return "bg-red-500";
+  }
+}
+
+function fog_index_percentage(fog_index) {
+  return (fog_index / 18) * 100;
 }
 
 export default App;

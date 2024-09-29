@@ -26,4 +26,12 @@ def speech_speed(transcription_words: List[TranscriptionWord]) -> Tuple[float, L
 
     avg_words_per_minute = len(transcription_words) / (transcription_words[-1].end - transcription_words[0].start) * 60
 
-    return avg_words_per_minute, words_per_minute, wpm_timestamps
+    pauses = []
+    pauses_timestamps = []
+    last_word_end = transcription_words[0].end
+    for word in transcription_words[1:]:
+        pauses.append(word.start - last_word_end)
+        last_word_end = word.end
+        pauses_timestamps.append((last_word_end, word.end))
+
+    return avg_words_per_minute, words_per_minute, wpm_timestamps, pauses, pauses_timestamps

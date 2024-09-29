@@ -47,7 +47,14 @@ async def analyze_video(video: UploadFile = File(...)):
         "target_audience": res["target_group"],
         "sentiment": res["sentiment"],
         "named_entities": res["named_entities"],
-        "creation_date": time.strftime("%Y-%m-%d")
+        "creation_date": time.strftime("%Y-%m-%d"),
+        "fog_index": res["fog_index"],
+        "questions": res["questions"],
+        "volumes": res["volumes"],
+        "volumes_timestamps": res["volumes_timestamps"],
+        "readable_transcription": res["readable_transcription"],
+        "english_translation": res["english_translation"],
+        "suggestions": res["suggestions"]
     }
 
 if __name__ == "__main__":

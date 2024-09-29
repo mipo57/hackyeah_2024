@@ -51,7 +51,8 @@ export function get_inference_by_id(id, inferences) {
     if (!found_inference) {
         return {
             wpm_timestamps: [],
-            wpm_data: []
+            wpm_data: [],
+            fog_index: 0
         }
     }
 

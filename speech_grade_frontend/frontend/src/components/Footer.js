@@ -14,9 +14,7 @@ function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Produkt</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Funkcje</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Cennik</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">FAQ</a></li>
+              <li><a href="https://www.gov.pl/web/finanse/pytania-i-odpowiedzi" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">FAQ</a></li>
             </ul>
           </div>
           <div>
@@ -29,7 +27,7 @@ function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8 flex justify-between items-center">
-          <p className="text-gray-400 text-sm">&copy; 2023 SłowoMistrz. Wszelkie prawa zastrzeżone.</p>
+          <p className="text-gray-400 text-sm">&copy; 2024 SłowoMistrz by bards.ai. Wszelkie prawa zastrzeżone.</p>
           <div className="flex space-x-6">
             <a href="#" className="text-gray-400 hover:text-gray-500">
               <span className="sr-only">Facebook</span>

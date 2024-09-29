@@ -75,5 +75,5 @@ def gunning_fog(text: str) -> float:
 def clarity_score(text: str, num_events: int) -> float:
     fog_index = gunning_fog(text)
     
-    return 100 * normalize_score(fog_index - num_events * 2, MIN_FOG, MAX_FOG) 
+    return 100 * normalize_score(fog_index + num_events * 2, MIN_FOG, MAX_FOG) 
 
