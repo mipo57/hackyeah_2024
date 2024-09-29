@@ -1,6 +1,8 @@
 
 # SłowoMistrz v1.0
 
+![App Demo](./app.gif)
+
 ## Wprowadzenie
 
 SłowoMistrz to zaawansowane narzędzie do analizy i poprawy jakości wypowiedzi, stworzone z myślą o profesjonalistach, mówcach i wszystkich, którzy chcą udoskonalić swoje umiejętności komunikacyjne. Projekt łączy w sobie najnowocześniejsze technologie przetwarzania języka naturalnego i uczenia maszynowego, aby dostarczyć kompleksową analizę mowy zarówno pod względem treści, jak i formy.
